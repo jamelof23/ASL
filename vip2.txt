@@ -1,0 +1,16 @@
+updated stylegan_generator.py to deal with pytorch for grad update
+run program New2.py
+output image .npy in Z
+InterFaceGAN-Jam4 convert z to w
+/InterFaceGAN-Jam4.ipynb
+
+reference archived big project problem
+
+
+new2.py need improve output
+new2.py need to fix run ssh
+InterFaceGAN-Jam4.ipynb need to fix all change name, remove all code, not work without all code
+
+
+
+
