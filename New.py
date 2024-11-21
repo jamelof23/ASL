@@ -111,8 +111,8 @@ optimizer = optim.Adam([latent_code], lr=0.01)
 
 
 # Training process
-num_iterations = 200000
-layer_weights = [1.0] * len(vgg16_layers)  # Equal weights for each VGG16 layer
+num_iterations = 20000
+layer_weights = [1, 1, 1, 1, 0, 0, 0, 0] #  # Equal weights for each VGG16 layer
 
 for iteration in range(num_iterations):
     optimizer.zero_grad()  # Clear previous gradients
