@@ -111,7 +111,7 @@ optimizer = optim.Adam([latent_code], lr=0.01)
 
 
 # Training process
-num_iterations = 300
+num_iterations = 200000
 layer_weights = [1.0] * len(vgg16_layers)  # Equal weights for each VGG16 layer
 
 for iteration in range(num_iterations):
@@ -171,20 +171,17 @@ for iteration in range(num_iterations):
         print("Initial losses for each VGG16 layer:")
         for idx, loss_value in enumerate(losses):
             print(f"Layer {vgg16_layers[idx]}: {loss_value:.6f}")
-        print(f"Initial color diversity loss: {color_diversity_loss.item():.6f}")
+            print(f"Initial color diversity loss: {color_diversity_loss.item():.6f}")
 
     total_loss.backward()
     optimizer.step()
 
+
     # Print losses every 100 iterations
     if iteration % 100 == 0 or iteration == num_iterations - 1:
-        loss_str = ', '.join(
-            [f"Layer {vgg16_layers[i]}: {losses[i]:.4f}" for i in range(len(losses))]
-        )
-        print(
-            f"Iteration {iteration}, Total Loss: {total_loss.item():.4f}, "
-            f"Color Diversity Loss: {color_diversity_loss.item():.4f}"
-        )
+        loss_str = ', '.join([f"Layer {vgg16_layers[i]}: {losses[i]:.4f}" for i in range(len(losses))])
+        print(f"Iteration {iteration}, Losses: {loss_str}, Color Diversity Loss: {color_diversity_loss.item():.4f}")
+    
 
 
 # Convert the final generated image to numpy format
