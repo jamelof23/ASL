@@ -111,14 +111,18 @@ optimizer = optim.Adam([latent_code], lr=0.01)
 
 
 # Training process
-num_iterations = 20000
-layer_weights = [1, 1, 1, 1, 0, 0, 0, 0] #  # Equal weights for each VGG16 layer
+num_iterations = 3000
+layer_weights = [1, 1, 1, 1, 1, 1, 0, 0] #  # Equal weights for each VGG16 layer
 
 for iteration in range(num_iterations):
     optimizer.zero_grad()  # Clear previous gradients
 
-    # Map the latent code to W space
-    w = generator.model.mapping(latent_code)  # Shape: [1, 512]
+    # Map the latent code to W space Shape: [1, 512]
+    if torch.cuda.device_count() > 1:
+        w = generator.model.module.mapping(latent_code)  # Access through module if DataParallel is used
+    else:
+        w = generator.model.mapping(latent_code)  # Access directly if not
+
 
     # Get the number of style inputs required by the synthesis network
     num_ws = generator.num_layers  # Access num_layers from generator
@@ -126,8 +130,12 @@ for iteration in range(num_iterations):
     # Repeat w to have shape [batch_size, num_ws, w_dim]
     w = w.unsqueeze(1).repeat(1, num_ws, 1)  # Shape: [1, num_ws, 512]
 
-    # Generate image with the current w
-    image = generator.model.synthesis(w)
+    # Dynamically check if DataParallel is applied
+    if hasattr(generator.model, "module"):
+        image = generator.model.module.synthesis(w)  # Access through module if wrapped in DataParallel
+    else:
+        image = generator.model.synthesis(w)  # Direct access if not wrapped
+
 
     # The generated image is in [-1, 1], so scale it to [0, 1]
     generated_image = (image + 1) / 2.0
@@ -182,6 +190,13 @@ for iteration in range(num_iterations):
         loss_str = ', '.join([f"Layer {vgg16_layers[i]}: {losses[i]:.4f}" for i in range(len(losses))])
         print(f"Iteration {iteration}, Losses: {loss_str}, Color Diversity Loss: {color_diversity_loss.item():.4f}")
     
+
+# Check if /data directory exists, else save in the current script's directory
+if os.path.exists("/data"):
+    latent_save_path = "/data/optimized_ws1.npy"
+else:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    latent_save_path = os.path.join(script_dir, "optimized_ws1.npy")
 
 
 # Convert the final generated image to numpy format
